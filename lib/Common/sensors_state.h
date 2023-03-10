@@ -2,9 +2,11 @@
 #define SENSORS_STATE_H
 
 struct SensorState {
+  bool brewSwitchState;
+  bool steamSwitchState;
+  bool hotWaterSwitchState;
   float temperature;
   float pressure;
-  float smoothedPressure;
   bool isPressureFalling;
   bool isPressureFallingFast;
   bool isPressureRising;
@@ -13,11 +15,23 @@ struct SensorState {
   bool isPumpFlowFallingFast;
   bool isSteamForgottenON;
   float pumpFlow;
-  float smoothedPumpFlow;
   float waterPumped;
   float weightFlow;
   float weight;
   float shotWeight;
+  float smoothedPressure;
+  float smoothedPumpFlow;
+  float smoothedWeightFlow;
+};
+
+struct SensorStateSnapshot {
+  bool brewActive;
+  bool steamActive;
+  float temperature;
+  float pressure;
+  float pumpFlow;
+  float weightFlow;
+  float weight;
 };
 
 #endif

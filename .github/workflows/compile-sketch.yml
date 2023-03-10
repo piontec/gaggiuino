@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: "14"
 
       - name: Install eclint
         run: |
@@ -30,29 +30,60 @@ jobs:
         run: |
           eclint check $(sh .eclint-files.sh)
 
-  compile-sketch:
+  compile:
+    name: Compilation
     runs-on: ubuntu-latest
     timeout-minutes: 30
-
+    strategy:
+      fail-fast: false
+      matrix:
+        environment:
+          - name: Main
+            command: "gaggia-lego-stlink"
+          - name: Scales
+            command: "scales-calibration-dfu"
     steps:
-      - name: Checkout master
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v1
-
+      - uses: actions/setup-python@v1
       - name: Install Platformio
         run: |
           python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
-
-      - name: Build the main project
+      - name: Building ${{ matrix.environment.name }}
         run: |
-          ~/.platformio/penv/bin/platformio run -e opto-dfu
+          ~/.platformio/penv/bin/platformio run -e ${{ matrix.environment.command }}
+        env:
+          PLATFORMIO_BUILD_SRC_FLAGS: -Wdouble-promotion -Wall -Werror
 
-      - name: Build scales
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Platformio
         run: |
-          ~/.platformio/penv/bin/platformio run -e scales-calibration-dfu
-
+          python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
       - name: Run tests
         run: |
           ~/.platformio/penv/bin/platformio test -e test
+
+  static-analysis:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment:
+          - "gaggia-lego-stlink"
+          - "scales-calibration-stlink"
+          # - "uart-stm"
+          # - "uart-esp"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Platformio
+        run: |
+          python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
+      - name: Run static analysis on ${{ matrix.environment }}
+        run: |
+          ~/.platformio/penv/bin/platformio check -e ${{ matrix.environment }} --fail-on-defect medium --fail-on-defect high

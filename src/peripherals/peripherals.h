@@ -12,10 +12,15 @@ static inline void pinInit(void) {
     pinMode(valvePin, OUTPUT);
   #endif
   pinMode(relayPin, OUTPUT);
+  #ifdef mainBoilerRelayPin
+  pinMode(mainBoilerRelayPin, OUTPUT);
+  #endif
+  #ifdef steamBoilerRelayPin
+  pinMode(steamBoilerRelayPin, OUTPUT);
+  #endif
   pinMode(brewPin,  INPUT_PULLUP);
   pinMode(steamPin, INPUT_PULLUP);
-  pinMode(HX711_dout_1, INPUT_PULLUP);
-  pinMode(HX711_dout_2, INPUT_PULLUP);
+  pinMode(waterPin, INPUT_PULLUP);
 }
 
 // Actuating the heater element
@@ -25,6 +30,30 @@ static inline void setBoilerOn(void) {
 
 static inline void setBoilerOff(void) {
   digitalWrite(relayPin, LOW);  // boilerPin -> LOW
+}
+
+static inline void setMainBoilerRelayOn(void) {
+  #ifdef mainBoilerRelayPin
+  digitalWrite(mainBoilerRelayPin, HIGH);  // mainBoilerRelayPin -> HIGH
+  #endif
+}
+
+static inline void setMainBoilerRelayOff(void) {
+  #ifdef mainBoilerRelayPin
+  digitalWrite(mainBoilerRelayPin, LOW);  // mainBoilerRelayPin -> LOW
+  #endif
+}
+
+static inline void setSteamBoilerRelayOn(void) {
+  #ifdef steamBoilerRelayPin
+  digitalWrite(steamBoilerRelayPin, HIGH);  // steamBoilerRelayPin -> HIGH
+  #endif
+}
+
+static inline void setSteamBoilerRelayOff(void) {
+  #ifdef steamBoilerRelayPin
+  digitalWrite(steamBoilerRelayPin, LOW);  // steamBoilerRelayPin -> LOW
+  #endif
 }
 
 //Function to get the state of the brew switch button
@@ -37,6 +66,10 @@ static inline bool brewState(void) {  //Monitors the current flowing through the
 // pin will be high when switch is ON.
 static inline bool steamState(void) {
   return digitalRead(steamPin) == LOW; // pin will be low when switch is ON.
+}
+
+static inline bool waterPinState(void) {
+  return digitalRead(waterPin) == LOW; // pin will be low when switch is ON.
 }
 
 static inline void openValve(void) {
